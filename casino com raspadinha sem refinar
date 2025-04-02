@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Cassino - Jogos de Azar</title>
+    
+    <style>
+        /* Estilos gerais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #121212;
+            color: #fff;
+            padding: 20px;
+        }
+        
+        /* Estilos do container */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Estilos do cabeçalho */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        
+        h1 {
+            color: #4CAF50;
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+        }
+        
+        /* Estilos do saldo */
+        .balance-container {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .balance {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #FFD700;
+        }
+        
+        .add-credits {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .add-credits:hover {
+            background-color: #3e8e41;
+        }
+        
+        /* Estilos das abas */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #444;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #333;
+            border: none;
+            color: #fff;
+            flex: 1;
+            transition: background-color 0.3s;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .tab:first-child {
+            border-top-left-radius: 5px;
+        }
+        
+        .tab:last-child {
+            border-top-right-radius: 5px;
+        }
+        
+        .tab.active {
+            background-color: #4CAF50;
+        }
+        
+        .tab:hover:not(.active) {
+            background-color: #444;
+        }
+        
+        /* Estilos das seções de jogo */
+        .game-section {
+            display: none;
+            padding: 20px;
+            background-color: #2a2a2a;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s;
+        }
+        
+        .game-section.active {
+            display: block;
+        }
+        
+        .game-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #4CAF50;
+            text-align: center;
+        }
+        
+        /* Estilos da aposta */
+        .bet-container {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .bet-label {
+            margin-right: 10px;
+        }
+        
+        .bet-input {
+            width: 80px;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #555;
+            background-color: #333;
+            color: #fff;
+            font-size: 16px;
+        }
+        
+        /* Estilos das opções */
+        .options-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .option-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #444;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.3s;
+            font-weight: bold;
+            min-width: 100px;
+        }
+        
+        .option-btn:hover {
+            background-color: #555;
+            transform: scale(1.05);
+        }
+        
+        .option-btn.selected {
+            background-color: #4CAF50;
+            transform: scale(1.05);
+        }
+        
+        /* Estilos das opções de cor */
+        .color-option {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.1s;
+            border: 3px solid transparent;
+        }
+        
+        .color-option:hover {
+            transform: scale(1.05);
+        }
+        
+        .color-option.selected {
+            border: 3px solid white;
+            transform: scale(1.05);
+        }
+        
+        .red {
+            background-color: #e74c3c;
+        }
+        
+        .blue {
+            background-color: #3498db;
+        }
+        
+        .green {
+            background-color: #2ecc71;
+        }
+        
+        /* Estilos do botão de jogar */
+        .play-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #FFD700;
+            color: #121212;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+            text-transform: uppercase;
+        }
+        
+        .play-btn:hover {
+            background-color: #FFC107;
+        }
+        
+        .play-btn:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+        
+        /* Estilos do resultado */
+        .result-container {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #333;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .result-text {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .win {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+        
+        .lose {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .result-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        
+        .color-result {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 10px 0;
+        }
+        
+        /* Estilos do histórico */
+        .history {
+            margin-top: 20px;
+        }
+        
+        .history-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #ccc;
+        }
+        
+        .history-list {
+            list-style: none;
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: #1e1e1e;
+            border-radius: 5px;
+        }
+        
+        .history-item {
+            padding: 8px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .history-game {
+            font-weight: bold;
+            color: #ccc;
+        }
+        
+        .history-result.win {
+            color: #2ecc71;
+        }
+        
+        .history-result.lose {
+            color: #e74c3c;
+        }
+        
+        /* Estilos de animação */
+        .shake {
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Estilos de notificação */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s, opacity 0.3s;
+            transform: translateX(200%);
+            opacity: 0;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        /* Estilos de animação de moeda */
+        .coin {
+            font-size: 50px;
+            animation: flip 1s;
+            display: inline-block;
+            margin: 10px 0;
+        }
+        
+        @keyframes flip {
+            0% { transform: rotateY(0); }
+            100% { transform: rotateY(1080deg); }
+        }
+        
+        /* Estilos de animação de dado */
+        .dice {
+            font-size: 50px;
+            animation: bounce 1s;
+            display: inline-block;
+            margin: 10px 0;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-30px); }
+            60% { transform: translateY(-15px); }
+        }
+        
+        /* Responsividade */
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .options-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .option-btn, .color-option {
+                margin-bottom: 10px;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                border-radius: 0;
+            }
+            
+            .tab:first-child {
+                border-top-left-radius: 5px;
+                border-top-right-radius: 5px;
+            }
+            
+            .tab:last-child {
+                border-bottom-left-radius: 5px;
+                border-bottom-right-radius: 5px;
+            }
+        }
+
+        /* Estilos de animação de caça-níqueis */
+        .slots-reels {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .reel {
+            font-size: 2rem;
+            padding: 10px;
+            background-color: #444;
+            border-radius: 5px;
+        }
+
+        /* Estilos da raspadinha */
+        .scratch-area {
+            position: relative;
+            height: 100px;
+            background-color: #333;
+            border-radius: 5px;
+            cursor: pointer;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .scratch-cover {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #707070, #505050);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ddd;
+            font-size: 14px;
+        }
+        
+        .symbol {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            font-size: 40px;
+        }
+        
+        .scratched .scratch-cover {
+            display: none;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .instructions {
+            background-color: #333;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 20px;
+            font-size: 14px;
+            text-align: left;
+            color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1> Mini Cassino</h1>
+            <p>Jogue e ganhe créditos!</p>
+        </header>
+        
+        <div class="balance-container">
+            <p>Seu Saldo:</p>
+            <p class="balance">R$ <span id="balance">100</span></p>
+            <button class="add-credits" id="addCredits">+ Adicionar Créditos</button>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" data-game="coinflip">Cara ou Coroa 🪙</button>
+            <button class="tab" data-game="luckyNumber">Número da Sorte </button>
+            <button class="tab" data-game="colorMatch">Acerte a Cor </button>
+            <button class="tab" data-game="slots">Caça-níqueis 🎰</button>
+            <button class="tab" data-game="scratch">Raspadinha 🎟️</button>
+        </div>
+        
+        <div class="game-section active" id="coinflip">
+            <h2 class="game-title">Cara ou Coroa</h2>
+            <div class="bet-container">
+                <span class="bet-label">Sua Aposta (R$):</span>
+                <input type="number" class="bet-input" id="coinflipBet" min="1" value="10">
+            </div>
+            <div class="options-container">
+                <button class="option-btn" data-option="cara">Cara</button>
+                <button class="option-btn" data-option="coroa">Coroa</button>
+            </div>
+            <button class="play-btn" id="coinflipPlay">Jogar</button>
+            <div class="result-container" id="coinflipResult">
+                <p class="result-text">Escolha cara ou coroa e clique em Jogar!</p>
+            </div>
+        </div>
+        
+        <div class="game-section" id="luckyNumber">
+            <h2 class="game-title">Número da Sorte</h2>
+            <div class="bet-container">
+                <span class="bet-label">Sua Aposta (R$):</span>
+                <input type="number" class="bet-input" id="luckyNumberBet" min="1" value="10">
+            </div>
+            <div class="options-container">
+                <button class="option-btn" data-option="1">1</button>
+                <button class="option-btn" data-option="2">2</button>
+                <button class="option-btn" data-option="3">3</button>
+                <button class="option-btn" data-option="4">4</button>
+                <button class="option-btn" data-option="5">5</button>
+            </div>
+            <button class="play-btn" id="luckyNumberPlay">Jogar</button>
+            <div class="result-container" id="luckyNumberResult">
+                <p class="result-text">Escolha um número e clique em Jogar!</p>
+            </div>
+        </div>
+        
+        <div class="game-section" id="colorMatch">
+            <h2 class="game-title">Acerte a Cor</h2>
+            <div class="bet-container">
+                <span class="bet-label">Sua Aposta (R$):</span>
+                <input type="number" class="bet-input" id="colorMatchBet" min="1" value="10">
+            </div>
+            <div class="options-container">
+                <div class="color-option red" data-option="vermelho"></div>
+                <div class="color-option blue" data-option="azul"></div>
+                <div class="color-option green" data-option="verde"></div>
+            </div>
+            <button class="play-btn" id="colorMatchPlay">Jogar</button>
+            <div class="result-container" id="colorMatchResult">
+                <p class="result-text">Escolha uma cor e clique em Jogar!</p>
+            </div>
+        </div>
+
+        <div class="game-section" id="slots">
+            <h2 class="game-title">Caça-níqueis</h2>
+            <div class="bet-container">
+                <span class="bet-label">Sua Aposta (R$):</span>
+                <input type="number" class="bet-input" id="slotsBet" min="1" value="10">
+            </div>
+            <button class="play-btn" id="slotsPlay">Jogar</button>
+            <div class="result-container" id="slotsResult">
+                <p class="result-text">Clique em Jogar para rodar os rolos!</p>
+                <div class="slots-reels">
+                    <span class="reel" id="reel1">🍒</span>
+                    <span class="reel" id="reel2">🍋</span>
+                    <span class="reel" id="reel3">🍊</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-section" id="scratch">
+            <h2 class="game-title">Raspadinha Virtual</h2>
+            <div class="game-board" id="gameBoard"></div>
+            <div class="message" id="scratchMessage"></div>
+            <div class="controls">
+                <button id="newGameBtn">Nova Raspadinha (R$10)</button>
+                <button id="scratchAllBtn">Raspar Todos</button>
+                        </div>
+            <div class="instructions">
+                <p><strong>Como jogar:</strong></p>
+                <ul>
+                    <li>Cada raspadinha custa R$10</li>
+                    <li>Clique nas áreas para raspar</li>
+                    <li>Combine 3 símbolos iguais para ganhar!</li>
+                    <li>Prêmios: 🍒 = R$20 | 🍋 = R$30 | 🔔 = R$50 | 💎 = R$100 | 🎰 = R$200</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="history">
+            <h3 class="history-title">Histórico de Jogadas</h3>
+            <ul class="history-list" id="historyList">
+            </ul>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Funções de persistência de dados
+            function loadUserData() {
+                const storedData = localStorage.getItem("casinoUserData");
+                if (storedData) {
+                    return JSON.parse(storedData);
+                }
+                return {
+                    balance: 100,
+                    history: []
+                };
+            }
+            
+            function saveUserData(data) {
+                localStorage.setItem("casinoUserData", JSON.stringify(data));
+            }
+            
+            // Carrega os dados do localStorage
+            const userData = loadUserData();
+            
+            // Estado do jogo
+            const gameState = {
+                balance: userData.balance,
+                currentGame: 'coinflip',
+                selectedOptions: {
+                    coinflip: null,
+                    luckyNumber: null,
+                    colorMatch: null,
+                    slots: null,
+                    scratch: null
+                },
+                history: userData.history
+            };
+            
+            // Elementos DOM
+            const balanceElement = document.getElementById('balance');
+            const addCreditsButton = document.getElementById('addCredits');
+            const tabs = document.querySelectorAll('.tab');
+            const gameSections = document.querySelectorAll('.game-section');
+            const optionButtons = document.querySelectorAll('.option-btn');
+            const colorOptions = document.querySelectorAll('.color-option');
+            const coinflipPlay = document.getElementById('coinflipPlay');
+            const luckyNumberPlay = document.getElementById('luckyNumberPlay');
+            const colorMatchPlay = document.getElementById('colorMatchPlay');
+            const slotsPlay = document.getElementById('slotsPlay');
+            const coinflipResult = document.getElementById('coinflipResult');
+            const luckyNumberResult = document.getElementById('luckyNumberResult');
+            const colorMatchResult = document.getElementById('colorMatchResult');
+            const slotsResult = document.getElementById('slotsResult');
+            const historyList = document.getElementById('historyList');
+            const notification = document.getElementById('notification');
+
+            const gameBoard = document.getElementById('gameBoard');
+            const scratchMessage = document.getElementById('scratchMessage');
+            const newGameBtn = document.getElementById('newGameBtn');
+            const scratchAllBtn = document.getElementById('scratchAllBtn');
+            
+            let symbols = ['🍒', '🍋', '🔔', '💎', '🎰'];
+            let prizes = {
+                '🍒': 20,
+                '🍋': 30,
+                '🔔': 50,
+                '💎': 100,
+                '🎰': 200
+            };
+            let currentBoard = [];
+            let scratchedAreas = [];
+            let gameActive = false;
+
+            // Funções para navegação entre abas
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const game = this.getAttribute('data-game');
+                    
+                    // Atualiza abas ativas
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Atualiza seção de jogo ativa
+                    gameSections.forEach(section => section.classList.remove('active'));
+                    document.getElementById(game).classList.add('active');
+                    
+                    // Atualiza jogo atual
+                    gameState.currentGame = game;
+                    
+                    // Reseta o texto do resultado
+                    resetResultText();
+                });
+            });
+            
+            // Funções para seleção de opções
+            optionButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const game = this.closest('.game-section').id;
+                    const option = this.getAttribute('data-option');
+                    
+                    // Remove seleção anterior
+                    const buttons = this.closest('.options-container').querySelectorAll('.option-btn');
+                    buttons.forEach(b => b.classList.remove('selected'));
+                    
+                    // Adiciona nova seleção
+                    this.classList.add('selected');
+                    
+                    // Atualiza estado do jogo
+                    gameState.selectedOptions[game] = option;
+                    
+                    // Reseta o texto do resultado
+                    resetResultText();
+                });
+            });
+            
+            // Funções para seleção de cores
+            colorOptions.forEach(color => {
+                color.addEventListener('click', function() {
+                    const option = this.getAttribute('data-option');
+                    
+                    // Remove seleção anterior
+                    colorOptions.forEach(c => c.classList.remove('selected'));
+                    
+                    // Adiciona nova seleção
+                    this.classList.add('selected');
+                    
+                    // Atualiza estado do jogo
+                    gameState.selectedOptions.colorMatch = option;
+                    
+                    // Reseta o texto do resultado
+                    resetResultText();
+                });
+            });
+            
+            // Função para adicionar créditos
+            addCreditsButton.addEventListener('click', function() {
+                const amount = 100;
+                gameState.balance += amount;
+                updateBalance();
+                showNotification(`+R$ ${amount} adicionados ao seu saldo!`);
+            });
+            
+            // Função para atualizar o saldo
+            function updateBalance() {
+                balanceElement.textContent = gameState.balance;
+                saveUserData({ ...gameState }); // Salva os dados
+            }
+            
+            // Função para mostrar notificação
+            function showNotification(message) {
+                notification.textContent = message;
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+            
+            // Função para adicionar item ao histórico
+            function addToHistory(game, result, amountWon) {
+                const gameNames = {
+                    coinflip: 'Cara ou Coroa',
+                    luckyNumber: 'Número da Sorte',
+                    colorMatch: 'Acerte a Cor',
+                    slots: 'Caça-níqueis',
+                    scratch: 'Raspadinha'
+                };
+                
+                const item = {
+                    game: gameNames[game],
+                    result: result === 'win' ? 'Ganhou' : 'Perdeu',
+                    amount: amountWon,
+                    time: new Date().toLocaleTimeString()
+                };
+                
+                gameState.history.unshift(item);
+                
+                // Limita o histórico a 10 itens
+                if (gameState.history.length > 10) {
+                    gameState.history.pop();
+                }
+                
+                updateHistoryDisplay();
+                saveUserData({ ...gameState }); // Salva os dados
+            }
+            
+            // Função para atualizar a exibição do histórico
+            function updateHistoryDisplay() {
+                historyList.innerHTML = '';
+                
+                gameState.history.forEach(item => {
+                    const li = document.createElement('li');
+                    li.classList.add('history-item');
+                    
+                    const gameSpan = document.createElement('span');
+                    gameSpan.classList.add('history-game');
+                    gameSpan.textContent = `${item.game} (${item.time})`;
+                    
+                    const resultSpan = document.createElement('span');
+                    resultSpan.classList.add('history-result');
+                    resultSpan.classList.add(item.result === 'Ganhou' ? 'win' : 'lose');
+                    resultSpan.textContent = item.result === 'Ganhou' ? `+R$ ${item.amount}` : `-R$ ${item.amount}`;
+                    
+                    li.appendChild(gameSpan);
+                    li.appendChild(resultSpan);
+                    historyList.appendChild(li);
+                });
+            }
+            
+            // Função para verificar se há saldo suficiente
+            function checkBalance(betAmount) {
+                if (gameState.balance < betAmount) {
+                    showNotification('Saldo insuficiente!');
+                    return false;
+                }
+                return true;
+            }
+            
+            // Função para verificar se uma opção foi selecionada
+            function checkOptionSelected(game) {
+                if (!gameState.selectedOptions[game]) {
+                    showNotification('Selecione uma opção para jogar!');
+                    return false;
+                }
+                return true;
+            }
+            
+            // Função para obter o valor da aposta
+            function getBetAmount(gameId) {
+                const betInput = document.getElementById(`${gameId}Bet`);
+                let amount = parseInt(betInput.value);
+                
+                if (isNaN(amount) || amount < 1) {
+                    betInput.value = 1;
+                    return 1;
+                }
+                
+                return amount;
+            }
+            
+            // Função para resetar textos de resultado
+            function resetResultText() {
+                coinflipResult.innerHTML = '<p class="result-text">Escolha cara ou coroa e clique em Jogar!</p>';
+                luckyNumberResult.innerHTML = '<p class="result-text">Escolha um número e clique em Jogar!</p>';
+                colorMatchResult.innerHTML = '<p class="result-text">Escolha uma cor e clique em Jogar!</p>';
+                slotsResult.innerHTML = '<p class="result-text">Clique em Jogar para rodar os rolos!</p>';
+                scratchMessage.innerHTML = '';
+            }
+            
+            // Jogo de Cara ou Coroa
+            coinflipPlay.addEventListener('click', function() {
+                const betAmount = getBetAmount('coinflip');
+                
+                if (!checkBalance(betAmount) || !checkOptionSelected('coinflip')) {
+                    return;
+                }
+                
+                // Deduz a aposta
+                gameState.balance -= betAmount;
+                updateBalance();
+                
+                // Animação
+                coinflipResult.innerHTML = '<div class="coin">🪙</div><p class="result-text">Lançando a moeda...</p>';
+                
+                // Desabilita o botão durante a animação
+                this.disabled = true;
+                
+                setTimeout(() => {
+                    // Gera resultado
+                    const options = ['cara', 'coroa'];
+                    const result = options[Math.floor(Math.random() * options.length)];
+                    const playerWon = result === gameState.selectedOptions.coinflip;
+                    
+                    // Calcula ganhos
+                    const winAmount = betAmount * 2;
+                    
+                    if (playerWon) {
+                        gameState.balance += winAmount;
+                        updateBalance();
+                        coinflipResult.innerHTML = `
+                            <div class="coin">🪙</div>
+                            <p class="result-text">Saiu <strong>${result.toUpperCase()}</strong>!</p>
+                            <p class="result-text win">Você ganhou R$ ${winAmount}!</p>
+                        `;
+                        showNotification(`Parabéns! Você ganhou R$ ${winAmount}!`);
+                        addToHistory('coinflip', 'win', winAmount);
+                    } else {
+                        coinflipResult.innerHTML = `
+                            <div class="coin">🪙</div>
+                            <p class="result-text">Saiu <strong>${result.toUpperCase()}</strong>!</p>
+                            <p class="result-text lose">Você perdeu R$ ${betAmount}.</p>
+                        `;
+                        showNotification(`Você perdeu R$ ${betAmount}.`);
+                        addToHistory('coinflip', 'lose', betAmount);
+                    }
+                    
+                    // Reativa o botão
+                    this.disabled = false;
+                }, 1000);
+            });
+            
+            // Jogo Número da Sorte
+            luckyNumberPlay.addEventListener('click', function() {
+                const betAmount = getBetAmount('luckyNumber');
+                
+                if (!checkBalance(betAmount) || !checkOptionSelected('luckyNumber')) {
+                    return;
+                }
+                
+                // Deduz a aposta
+                gameState.balance -= betAmount;
+                updateBalance();
+                
+                // Animação
+                luckyNumberResult.innerHTML = '<div class="dice"></div><p class="result-text">Sorteando o número...</p>';
+                
+                // Desabilita o botão durante a animação
+                this.disabled = true;
+                
+                setTimeout(() => {
+                    // Gera resultado
+                    const result = Math.floor(Math.random() * 5) + 1;
+                    const playerChoice = parseInt(gameState.selectedOptions.luckyNumber);
+                    const playerWon = result === playerChoice;
+                    
+                    // Calcula ganhos
+                    const winAmount = betAmount * 5;
+                    
+                    if (playerWon) {
+                        gameState.balance += winAmount;
+                        updateBalance();
+                        luckyNumberResult.innerHTML = `
+                            <div class="dice"></div>
+                            <p class="result-text">Número sorteado: <strong>${result}</strong>!</p>
+                            <p class="result-text win">Você ganhou R$ ${winAmount}!</p>
+                        `;
+                        showNotification(`Parabéns! Você ganhou R$ ${winAmount}!`);
+                        addToHistory('luckyNumber', 'win', winAmount);
+                    } else {
+                        luckyNumberResult.innerHTML = `
+                            <div class="dice"></div>
+                            <p class="result-text">Número sorteado: <strong>${result}</strong>!</p>
+                            <p class="result-text lose">Você perdeu R$ ${betAmount}.</p>
+                        `;
+                        showNotification(`Você perdeu R$ ${betAmount}.`);
+                        addToHistory('luckyNumber', 'lose', betAmount);
+                    }
+                    
+                    // Reativa o botão
+                    this.disabled = false;
+                }, 1000);
+            });
+            
+            // Jogo Acerte a Cor
+            colorMatchPlay.addEventListener('click', function() {
+                const betAmount = getBetAmount('colorMatch');
+                
+                if (!checkBalance(betAmount) || !checkOptionSelected('colorMatch')) {
+                    return;
+                }
+                
+                // Deduz a aposta
+                gameState.balance -= betAmount;
+                updateBalance();
+                
+                // Animação
+                colorMatchResult.innerHTML = '<p class="result-text">Sorteando a cor...</p>';
+                
+                // Desabilita o botão durante a animação
+                this.disabled = true;
+                
+                setTimeout(() => {
+                    // Gera resultado
+                    const options = ['vermelho', 'azul', 'verde'];
+                    const result = options[Math.floor(Math.random() * options.length)];
+                    const playerWon = result === gameState.selectedOptions.colorMatch;
+                    
+                    // Calcula ganhos
+                    const winAmount = betAmount * 3;
+                    
+                    // Adiciona a cor sorteada ao resultado
+                    const colorDiv = document.createElement('div');
+                    colorDiv.classList.add('color-result');
+                    
+                    if (result === 'vermelho') {
+                        colorDiv.classList.add('red');
+                    } else if (result === 'azul') {
+                        colorDiv.classList.add('blue');
+                    } else {
+                        colorDiv.classList.add('green');
+                    }
+                    
+                    if (playerWon) {
+                        gameState.balance += winAmount;
+                        updateBalance();
+                        colorMatchResult.innerHTML = `
+                            <p class="result-text">Cor sorteada:</p>
+                        `;
+                        colorMatchResult.appendChild(colorDiv);
+                        const winText = document.createElement('p');
+                        winText.classList.add('result-text', 'win');
+                        winText.innerHTML = `Você ganhou R$ ${winAmount}!`;
+                        colorMatchResult.appendChild(winText);
+                        
+                        showNotification(`Parabéns! Você ganhou R$ ${winAmount}!`);
+                        addToHistory('colorMatch', 'win', winAmount);
+                    } else {
+                        colorMatchResult.innerHTML = `
+                            <p class="result-text">Cor sorteada:</p>
+                        `;
+                        colorMatchResult.appendChild(colorDiv);
+                        const loseText = document.createElement('p');
+                        loseText.classList.add('result-text', 'lose');
+                        loseText.innerHTML = `Você perdeu R$ ${betAmount}.`;
+                        colorMatchResult.appendChild(loseText);
+                        
+                        showNotification(`Você perdeu R$ ${betAmount}.`);
+                        addToHistory('colorMatch', 'lose', betAmount);
+                    }
+                    
+                    // Reativa o botão
+                    this.disabled = false;
+                }, 1000);
+            });
+
+            // Jogo de Caça-níqueis
+            slotsPlay.addEventListener('click', function() {
+                const betAmount = getBetAmount('slots');
+                
+                if (!checkBalance(betAmount)) {
+                    return;
+                }
+                
+                // Deduz a aposta
+                gameState.balance -= betAmount;
+                updateBalance();
+                
+                // Animação
+                slotsResult.innerHTML = '<p class="result-text">Rodando os rolos...</p>';
+                
+                // Desabilita o botão durante a animação
+                this.disabled = true;
+                
+                setTimeout(() => {
+                    // Gera resultado
+                    const options = ['🍒', '🍋', '🍊', '⭐', '🔔', '💎'];
+                    const reel1 = options[Math.floor(Math.random() * options.length)];
+                    const reel2 = options[Math.floor(Math.random() * options.length)];
+                    const reel3 = options[Math.floor(Math.random() * options.length)];
+                    
+                    // Calcula ganhos
+                    let winAmount = 0;
+                    if (reel1 === reel2 && reel2 === reel3) {
+                        winAmount = betAmount * 10;
+                    } else if (reel1 === reel2 || reel2 === reel3 || reel1 === reel3) {
+                        winAmount = betAmount * 3;
+                    }
+                    
+                    if (winAmount > 0) {
+                        gameState.balance += winAmount;
+                        updateBalance();
+                        slotsResult.innerHTML = `
+                            <div class="slots-reels">
+                                <span class="reel">${reel1}</span>
+                                <span class="reel">${reel2}</span>
+                                <span class="reel">${reel3}</span>
+                            </div>
+                            <p class="result-text win">Você ganhou R$ ${winAmount}!</p>
+                        `;
+                        showNotification(`Parabéns! Você ganhou R$ ${winAmount}!`);
+                        addToHistory('slots', 'win', winAmount);
+                    } else {
+                        slotsResult.innerHTML = `
+                            <div class="slots-reels">
+                                <span class="reel">${reel1}</span>
+                                <span class="reel">${reel2}</span>
+                                <span class="reel">${reel3}</span>
+                            </div>
+                            <p class="result-text lose">Você perdeu R$ ${betAmount}.</p>
+                        `;
+                        showNotification(`Você perdeu R$ ${betAmount}.`);
+                        addToHistory('slots', 'lose', betAmount);
+                                        }
+                    
+                    // Reativa o botão
+                    this.disabled = false;
+                }, 1000);
+            });
+
+            // Jogo de Raspadinha
+            newGameBtn.addEventListener('click', startNewGame);
+            scratchAllBtn.addEventListener('click', scratchAll);
+            scratchAllBtn.disabled = true;
+
+            function startNewGame() {
+                if (!checkBalance(10)) {
+                    scratchMessage.textContent = "Saldo insuficiente!";
+                    scratchMessage.className = "message lose";
+                    return;
+                }
+
+                // Deduzir o custo da raspadinha
+                gameState.balance -= 10;
+                updateBalance();
+
+                // Limpar mensagem anterior
+                scratchMessage.textContent = "";
+                scratchMessage.className = "message";
+
+                // Gerar um novo tabuleiro
+                gameBoard.innerHTML = "";
+                currentBoard = [];
+                scratchedAreas = [];
+                gameActive = true;
+                scratchAllBtn.disabled = false;
+
+                // Criar símbolos aleatórios (com maior chance de não ganhar)
+                let boardSymbols = [];
+                let isWinner = Math.random() < 0.25;
+
+                if (isWinner) {
+                    let winningSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+                    for (let i = 0; i < 3; i++) {
+                        boardSymbols.push(winningSymbol);
+                    }
+                    for (let i = 0; i < 6; i++) {
+                        let randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+                        while (countInArray(boardSymbols, randomSymbol) >= 3) {
+                            randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+                        }
+                        boardSymbols.push(randomSymbol);
+                    }
+                } else {
+                    for (let i = 0; i < 9; i++) {
+                        boardSymbols.push(symbols[Math.floor(Math.random() * symbols.length)]);
+                    }
+                    while (hasWinningCombination(boardSymbols)) {
+                        let randomIndex = Math.floor(Math.random() * 9);
+                        let randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+                        boardSymbols[randomIndex] = randomSymbol;
+                    }
+                }
+
+                boardSymbols = shuffleArray(boardSymbols);
+
+                for (let i = 0; i < 9; i++) {
+                    const symbol = boardSymbols[i];
+                    currentBoard.push(symbol);
+
+                    const scratchArea = document.createElement('div');
+                    scratchArea.className = 'scratch-area';
+                    scratchArea.dataset.index = i;
+
+                    const symbolElement = document.createElement('div');
+                    symbolElement.className = 'symbol';
+                    symbolElement.textContent = symbol;
+
+                    const scratchCover = document.createElement('div');
+                    scratchCover.className = 'scratch-cover';
+                    scratchCover.textContent = 'Raspe aqui!';
+
+                    scratchArea.appendChild(symbolElement);
+                    scratchArea.appendChild(scratchCover);
+
+                    scratchArea.addEventListener('click', () => scratchCard(scratchArea, i));
+
+                    gameBoard.appendChild(scratchArea);
+                }
+            }
+
+            function scratchCard(scratchArea, index) {
+                if (!gameActive) return;
+
+                if (!scratchArea.classList.contains('scratched')) {
+                    scratchArea.classList.add('scratched');
+                    scratchedAreas.push(index);
+
+                    const cover = scratchArea.querySelector('.scratch-cover');
+                    cover.style.transition = 'opacity 0.3s';
+                    cover.style.opacity = 0;
+
+                    setTimeout(() => {
+                        cover.style.display = 'none';
+                    }, 300);
+
+                    checkWin();
+                }
+            }
+
+            function scratchAll() {
+                if (!gameActive) return;
+
+                const scratchAreas = document.querySelectorAll('.scratch-area:not(.scratched)');
+
+                scratchAreas.forEach((area, i) => {
+                    setTimeout(() => {
+                        const index = parseInt(area.dataset.index);
+                        scratchCard(area, index);
+                    }, i * 200);
+                });
+            }
+
+            function checkWin() {
+                if (scratchedAreas.length < 3) return;
+                const scratchedSymbols = scratchedAreas.map(index => currentBoard[index]);
+                const symbolCounts = {};
+                scratchedSymbols.forEach(symbol => {
+                    symbolCounts[symbol] = (symbolCounts[symbol] || 0) + 1;
+                });
+
+                let winningSymbol = null;
+                for (const symbol in symbolCounts) {
+                    if (symbolCounts[symbol] >= 3) {
+                        winningSymbol = symbol;
+                        break;
+                    }
+                }
+
+                if (scratchedAreas.length === 9 || winningSymbol) {
+                    gameActive = false;
+                    scratchAllBtn.disabled = true;
+
+                    if (winningSymbol) {
+                        const prize = prizes[winningSymbol];
+                        gameState.balance += prize;
+                        updateBalance();
+                        scratchMessage.textContent = `Parabéns! Você ganhou R$ ${prize} com ${winningSymbol}`;
+                        scratchMessage.className = "message win";
+
+                        scratchedAreas.forEach(index => {
+                            if (currentBoard[index] === winningSymbol) {
+                                const symbolEl = document.querySelectorAll('.scratch-area')[index].querySelector('.symbol');
+                                symbolEl.style.animation = 'pulse 0.5s infinite alternate';
+                                symbolEl.style.textShadow = '0 0 10px yellow';
+                            }
+                        });
+                    } else {
+                        scratchMessage.textContent = "Não foi dessa vez. Tente novamente!";
+                        scratchMessage.className = "message lose";
+                    }
+
+                    document.querySelectorAll('.scratch-area:not(.scratched)').forEach(area => {
+                        setTimeout(() => {
+                            const index = parseInt(area.dataset.index);
+                            scratchCard(area, index);
+                        }, 300);
+                    });
+                }
+            }
+
+            function countInArray(array, item) {
+                return array.filter(i => i === item).length;
+            }
+
+            function hasWinningCombination(board) {
+                const symbolCounts = {};
+
+                board.forEach(symbol => {
+                    symbolCounts[symbol] = (symbolCounts[symbol] || 0) + 1;
+                });
+
+                for (const symbol in symbolCounts) {
+                    if (symbolCounts[symbol] >= 3) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+
+            // Inicializa o saldo e histórico
+            updateBalance();
+            updateHistoryDisplay();
+        });
+    </script>
+</body>
+</html>
+                    
